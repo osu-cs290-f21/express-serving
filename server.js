@@ -1,14 +1,11 @@
 var express = require('express')
+var logger = require('./logger')
 
 var app = express()
 
-app.use(function (req, res, next) {
-  console.log("== Request received")
-  console.log("  -- req.url:", req.url)
-  console.log("  -- req.method:", req.method)
-  next()
-  // res.send()
-})
+app.use(logger)
+
+app.use(express.static('public'))
 
 app.use(function (req, res, next) {
   console.log("  -- second middleware")
@@ -31,6 +28,31 @@ app.get('/about', function (req, res, next) {
 app.get('/', function (req, res, next) {
   console.log("  -- home page requested")
   res.status(200).sendFile(__dirname + '/public/index.html')
+})
+
+var availablePeople = [
+  'luke',
+  'leia',
+  'rey',
+  'finn',
+  'r2d2'
+]
+
+app.get('/people/:person', function (req, res, next) {
+  console.log("  -- person page requested")
+  console.log("  -- req.params.person:", req.params.person)
+  var person = req.params.person
+  if (availablePeople.indexOf(person) !== -1) {
+    res.status(200).sendFile(__dirname + '/public/people/' + person + '.html')
+  } else {
+    next()
+  }
+})
+
+app.get('/:user/status/:id', function (req, res, next) {
+  console.log("  -- tweet page requested")
+  console.log("  -- req.params:", req.params)
+  next()
 })
 
 app.get('*', function (req, res, next) {
